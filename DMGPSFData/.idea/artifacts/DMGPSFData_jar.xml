@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact name="DMGPSFData:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/DMGPSFData_jar</output-path>
+    <root id="root">
+      <element id="archive" name="DMGPSFData.jar">
+        <element id="module-output" name="DMGPSFData" />
+      </element>
+      <element id="library" level="application" name="scala-sdk-2.10.5" />
+      <element id="library" level="application" name="spark-assembly-1.6.0-hadoop2.6.0" />
+    </root>
+  </artifact>
+</component>
