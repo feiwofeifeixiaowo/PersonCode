@@ -24,7 +24,9 @@ object mainScala {
 //    val begDate   = args(0)  //20161202
 //    val endDate   = args(1)  //20161212
     //FcdBusProxyMessage.2016-12-11.log
-    val inFList    = List("2016-12-07","2016-12-08","2016-12-09","2016-12-10","2016-12-11","2016-12-12","2016-12-13")
+    val inFList    = List("2016-12-07","2016-12-08","2016-12-09","2016-12-11")
+
+    // val inFList    = List("2016-12-07","2016-12-08","2016-12-09","2016-12-10","2016-12-11","2016-12-12","2016-12-13")
     val r     = scala.util.Random
     //val newID = idList(r.nextInt(idList.length - 1))
 //    val bDate = stringToDate(begDate + "000000")
@@ -85,7 +87,9 @@ object mainScala {
 
 
     val randomTmp = inFList(r.nextInt(inFList.length))
+//    val newArgs = args(1)
     val inFile = "FcdBusProxyMessage." + randomTmp + ".log"
+//    val inFile = "FcdBusProxyMessage." + newArgs + ".log"
     val textFile: RDD[String] = sc.textFile("hdfs://192.168.1.51/user/data/GPS/" + inFile).cache()
     val phoneNum: RDD[String] = textFile.map(line => {
       val splitResult = line.split("\\*")
