@@ -3,9 +3,7 @@
  */
 
 import java.text.{DateFormat, SimpleDateFormat}
-import java.util
 import java.util.{Calendar, Date}
-
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
@@ -24,23 +22,34 @@ object mainScala {
     val newDate   = args(0)  //2016-12-02
 
     //FcdBusProxyMessage.2016-12-11.log
-    val inFList    = List("2016-12-07","2016-12-08","2016-12-09","2016-12-11")
-
+    //FcdTaxiProxyMessage.2016-12-14.log
+    //BUSGPS_01-01-16.txt  BUS
+    //BUSGPS_03-01-16.txt
+    //BUSGPS_04-01-16.txt
+    //BUSGPS_05-01-16.txt
+    //FCDGPS_02-06-16.txt  Taxi
+    //val inFList    = List("2016-12-07","2016-12-08","2016-12-09","2016-12-11")
+    //inFlist for BUSGPS
+    //val inFList = List("01-01-16","02-01-16","03-01-16","04-01-16", "05-01-16", "06-01-16", "07-01-16", "08-01-16", "09-01-16")
+    ////inFlist for TaxiGPS
+    val inFList = List("01-06-16","02-06-16","03-06-16","04-06-16", "05-06-16", "06-06-16", "07-06-16", "08-06-16", "09-06-16")
     val r     = scala.util.Random
 
-    val conf = new SparkConf().setAppName("FakeGPSData Application")//.set("spark.executor.memory","6g")
+    val conf = new SparkConf().setAppName("FakeTaxiGPSData Application")//.set("spark.executor.memory","6g")
     val sc = new SparkContext(conf)
 
     val randomTmp = inFList(r.nextInt(inFList.length))
-
-    val inFile = "FcdBusProxyMessage." + randomTmp + ".log"
+    //infile for busgps
+    //val inFile = "BUSGPS_" + randomTmp + ".txt"
+    //infile for taxigps
+    val inFile = "FCDGPS_" + randomTmp + ".txt"
 
     val arrBuffer = ArrayBuffer[String]()
 
     val idBCArray: Broadcast[ArrayBuffer[String]] = sc.broadcast(arrBuffer)
 
-//    val textFile: RDD[String] = sc.textFile("hdfs://192.168.1.51/user/data/GPS/" + inFile)//.cache()
-    val textFile: RDD[String] = sc.textFile("file:///Users/X/Desktop/" + "Taxi.GPS.json")//.cache()
+    val textFile: RDD[String] = sc.textFile("hdfs://192.168.1.51/user/data/GPS/" + inFile)//.cache()
+    //val textFile: RDD[String] = sc.textFile("file:///Users/X/Desktop/" + "Taxi.GPS.json")//.cache()
 
     val idRDD: RDD[String] = textFile.map(line => {
       val taxiMap = JSON.parseFull(line)
@@ -52,7 +61,7 @@ object mainScala {
     val dataMap: RDD[Map[String, Any]] = textFile.map(line => {
       val taxiMap = JSON.parseFull(line)
       val taxiInfo: Map[String, Any] = taxiMap.get.asInstanceOf[Map[String, Any]]
-//      val id = taxiInfo.get("id").get.asInstanceOf[String]
+      //val id = taxiInfo.get("id").get.asInstanceOf[String]
       taxiInfo
     }
     )//.flatMap(line => line)
@@ -75,7 +84,6 @@ object mainScala {
          val oldId = jsonMap.get("id").get.asInstanceOf[String]
          if(oldId.equals(i._1)) {
            // 执行替换操作
-//           println("o -> n : " + oldId + " -> " + i._2)
            newJsonMap = newJsonMap.updated("id", i._2)
            newJsonMap = newJsonMap.updated("vehicleNo", i._2)
            newJsonMap = newJsonMap.updated("time", newTime)
@@ -83,15 +91,16 @@ object mainScala {
        }
         // 这种形式转换后 key的顺序会不同于原数据
         // val ret = JSONObject(newJsonMap).toString()
-      val ret = mapToJsonStr(newJsonMap)
+      val ret = taxiMapToJsonStr(newJsonMap)
         ret
-//      newJsonMap
-    }).saveAsTextFile("file:///Users/X/Desktop/" + newDate + "-Taxi.json")
+      //newJsonMap
+    }).saveAsTextFile("hdfs://192.168.1.51/user/data/GPS/result/Taxi/" + newDate)
 
     println("共用时间（秒）："+ (startTime - System.nanoTime())/ 1e9)
   } // main func
 
-  def mapToJsonStr(map: Map[String, Any]): String = {
+  def taxiMapToJsonStr(map: Map[String, Any]): String = {
+
     val id = map.get("id").get.asInstanceOf[String]
     val time = map.get("time").get.asInstanceOf[String]
     val lon = map.get("lon").get.asInstanceOf[String]
