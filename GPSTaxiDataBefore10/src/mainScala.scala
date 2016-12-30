@@ -20,7 +20,7 @@ object mainScala {
     val startTime = System.nanoTime()//用于记录运行时间
 
     val newDate   = args(0)  //2016-12-02
-
+    val beforeNewDate = args(1) //2016-12-01
     //FcdBusProxyMessage.2016-12-11.log
     //FcdTaxiProxyMessage.2016-12-14.log
     //BUSGPS_01-01-16.txt  BUS
@@ -79,14 +79,26 @@ object mainScala {
     val bcVal: Broadcast[HashMap[String, String]] = sc.broadcast(idHashMap)
     val writeRDD = dataMap.map(jsonMap => {
       var newJsonMap = jsonMap
-      val newTime = newDate + " " + jsonMap.get("time").get.asInstanceOf[String].split(" ")(1)
+      //val newTime = newDate + " " + jsonMap.get("time").get.asInstanceOf[String].split(" ")(1)
+
+      val oldDTmp = randomTmp.split("-")
+      val inFileDate = "20" + oldDTmp(2) + "-" + oldDTmp(1) + "-" + oldDTmp(0) //2016-01-02
+      val oldTime = jsonMap.get("time").get.asInstanceOf[String].split(" ") //2016-01-01
+
        for (i <- bcVal.value) {
          val oldId = jsonMap.get("id").get.asInstanceOf[String]
          if(oldId.equals(i._1)) {
            // 执行替换操作
            newJsonMap = newJsonMap.updated("id", i._2)
            newJsonMap = newJsonMap.updated("vehicleNo", i._2)
-           newJsonMap = newJsonMap.updated("time", newTime)
+           if (oldTime(0).equals(inFileDate)) {
+             val newTime = newDate + " " + oldTime(1)
+             newJsonMap = newJsonMap.updated("time", newTime)
+           }else {
+             val newTime = beforeNewDate + " " + oldTime(1)
+             newJsonMap = newJsonMap.updated("time", newTime)
+           }
+
          }
        }
         // 这种形式转换后 key的顺序会不同于原数据

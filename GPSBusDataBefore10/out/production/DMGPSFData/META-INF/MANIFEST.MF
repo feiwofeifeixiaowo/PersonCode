@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-Class-Path: scala-library-2.10.5.jar scala-reflect-2.10.5.jar spark-as
- sembly-1.6.0-hadoop2.6.0.jar
-Main-Class: mainScala
-
